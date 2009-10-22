@@ -81,22 +81,22 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                        'copyright'  => array(
                                         'required'       => false,
                                         'allow_multiple' => true,
-                                        'order_text'     => 'follows @author',
+                                        'order_text'     => 'follows @author (if used) or @subpackage (if used) or @package',
                                        ),
                        'license'    => array(
                                         'required'       => false,
                                         'allow_multiple' => false,
-                                        'order_text'     => 'follows @copyright (if used) or @author',
+                                        'order_text'     => 'follows @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
                                        ),
                        'version'    => array(
                                         'required'       => false,
                                         'allow_multiple' => false,
-                                        'order_text'     => 'follows @license',
+                                        'order_text'     => 'follows @license (if used) or @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
                                        ),
                        'link'       => array(
                                         'required'       => false,
                                         'allow_multiple' => true,
-                                        'order_text'     => 'follows @version',
+                                        'order_text'     => 'follows @version (if used) or @license (if used) or @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
                                        ),
                        'see'        => array(
                                         'required'       => false,

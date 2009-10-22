@@ -1,0 +1,49 @@
+=A Nose For Joomla
+
+This is a custom coding standard for the PHP CodeSniffer that attempts to codify and enforce the Joomla coding standards.
+
+==Why?
+
+The reasons seem obvious, but one look at reality shows they aren't, so I'll enumerate some of them here:
+
+- Coherent and consisting coding practice makes the files look more professional. Conflicting styles in the same project (or worse, the same file) not only look sloppy, they encourage further sloppiness.
+
+- When all code complies with the same standard, bad code is easier for everyone to spot.
+
+- It makes it easier for someone new to a particular file in the project to find and fix errors, or extend functionality.
+
+- If there is no consistent standard maintained, the sometimes developers will reformat the code to suit themselves. This causes a wide range of changes in the code repository, and if there is a later problem, a significant change could be lost in the chaff produced by a diff.
+
+==Why This Particular Coding Standard?
+
+The short answer is "Don't ask me. I didn't make that decision."
+
+I don't hold a brief for any particular coding standard over any other one. I've coded in many, and I expect I'll be asked to code in many more before I'm done.
+
+The main point is <em>What standard you use isn't as important as all developers on a project using the same one.</em>
+
+The Joomla development team agreed on this standard (http://docs.joomla.org/Coding_style_and_standards) and that document is the source of the rules found here. Consider that page definitive in any point where it differs from this output.
+
+==Installation
+
+First you'll need to install phpcs (http://pear.php.net/package/PHP_CodeSniffer/download/). Then download and unzip this repository, and copy the contents of it into /path/to/PHP_CodeSniffer/Standards/Joomla.
+
+Then you invoke the custom standard by
+
+<tt>phpcs --standard=Joomla file/to/sniff</tt>
+
+Further documentation on the use of phpcs can be found at: http://pear.php.net/package/PHP_CodeSniffer/docs
+
+== Revision History
+
+	*0.2 -- Basic functionality complete
+
+== To Do
+
+This is early in the development of this extension, and we need to be it covers all relevant rules. Here's what I <strong>know</strong> is missing. Feel free to contact me with more.
+
+	*Enforce @abstract doc block comment for abstract classes and methods
+	*Enforce @static doc block comment for static methods
+	*Enforce @access private doc block comment for private methods
+
+Feel free to chime in with other ideas.

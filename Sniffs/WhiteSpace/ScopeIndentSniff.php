@@ -42,7 +42,7 @@ class Joomla_Sniffs_WhiteSpace_ScopeIndentSniff extends Generic_Sniffs_WhiteSpac
      *
      * @var array(int)
      */
-    protected $nonIndentingScopes = array(T_SWITCH);
+    protected $nonIndentingScopes = array();
 
 }//end class
 

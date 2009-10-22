@@ -1,7 +1,7 @@
 <documentation title="Line Length">
     <standard>
     <![CDATA[
-    It is recommended to keep lines at approximately 90 characters long for better code readability.
+    It is recommended to keep lines trimmed for better code readability but the decision on absolute length is left to the developer.
     ]]>
     </standard>
 </documentation>
