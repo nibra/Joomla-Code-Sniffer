@@ -1,11 +1,12 @@
 <?php
 /**
- * Joomla_Sniffs_Whitespace_ScopeIndentSniff. (Unchanged from PEAR sniffer)
+ * Joomla_Sniffs_Whitespace_ScopeIndentSniff. (Changed slightly from PEAR sniffer)
  *
  * PHP version 5
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
+ * @author    Paladin <arlen.walker@gmail.com>
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
  * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
@@ -27,6 +28,7 @@ if (class_exists('Generic_Sniffs_WhiteSpace_ScopeIndentSniff', true) === false) 
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
+ * @author    Paladin <arlen.walker@gmail.com>
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @author    Marc McIntyre <mmcintyre@squiz.net>
  * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
