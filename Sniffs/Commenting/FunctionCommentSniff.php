@@ -344,20 +344,21 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                 $errorPos     = ($param->getLine() + $commentStart);
 
                 // Make sure that there is only one space before the var type.
-                if ($param->getWhitespaceBeforeType() !== ' ') {
+//                if ($param->getWhitespaceBeforeType() !== ' ') {
+                if (!preg_match( '/^[ ]{1,4}$/', $param->getWhitespaceBeforeType()) ) {
                     $error = 'Expected 1 space before variable type';
                     $this->currentFile->addError($error, $errorPos);
                 }
 
-                $spaceCount = substr_count($param->getWhitespaceBeforeVarName(), ' ');
-                if ($spaceCount < $spaceBeforeVar) {
-                    $spaceBeforeVar = $spaceCount;
-                    $longestType    = $errorPos;
-                }
+                 $spaceCount = substr_count($param->getWhitespaceBeforeVarName(), ' ');
+                 if ($spaceCount < $spaceBeforeVar) {
+//                     $spaceBeforeVar = $spaceCount;
+//                     $longestType    = $errorPos;
+//                 }
 
-                $spaceCount = substr_count($param->getWhitespaceBeforeComment(), ' ');
+//                $spaceCount = substr_count($param->getWhitespaceBeforeComment(), ' ');
 
-                if ($spaceCount < $spaceBeforeComment && $paramComment !== '') {
+//                if ($spaceCount < $spaceBeforeComment && $paramComment !== '') {
                     $spaceBeforeComment = $spaceCount;
                     $longestVar         = $errorPos;
                 }
@@ -366,18 +367,18 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                 // and have the correct name.
                 $pos = $param->getPosition();
 
-                $paramName = ($param->getVarName() !== '') ? $param->getVarName() : '[ UNKNOWN ]';
+//                $paramName = ($param->getVarName() !== '') ? $param->getVarName() : '[ UNKNOWN ]';
 
                 if ($previousParam !== null) {
-                    $previousName = ($previousParam->getVarName() !== '') ? $previousParam->getVarName() : 'UNKNOWN';
+//                    $previousName = ($previousParam->getVarName() !== '') ? $previousParam->getVarName() : 'UNKNOWN';
 
                     // Check to see if the parameters align properly.
-                    if ($param->alignsVariableWith($previousParam) === false) {
-                        $error = 'The variable names for parameters '.$previousName.' ('.($pos - 1).') and '.$paramName.' ('.$pos.') do not align';
-                        $this->currentFile->addError($error, $errorPos);
-                    }
+                     if ($param->alignsVariableWith($previousParam) === false) {
+//                         $error = 'The variable names for parameters '.$previousName.' ('.($pos - 1).') and '.$paramName.' ('.$pos.') do not align';
+//                         $this->currentFile->addError($error, $errorPos);
+//                     }
 
-                    if ($param->alignsCommentWith($previousParam) === false) {
+//                    if ($param->alignsCommentWith($previousParam) === false) {
                         $error = 'The comments for parameters '.$previousName.' ('.($pos - 1).') and '.$paramName.' ('.$pos.') do not align';
                         $this->currentFile->addError($error, $errorPos);
                     }
@@ -393,13 +394,13 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                         $realName = '&'.$realName;
                     }
 
-                    if ($realName !== $param->getVarName()) {
-                        $error  = 'Doc comment var "'.$paramName;
-                        $error .= '" does not match actual variable name "'.$realName;
-                        $error .= '" at position '.$pos;
-
-                        $this->currentFile->addError($error, $errorPos);
-                    }
+//                     if ($realName !== $param->getVarName()) {
+//                         $error  = 'Doc comment var "'.$paramName;
+//                         $error .= '" does not match actual variable name "'.$realName;
+//                         $error .= '" at position '.$pos;
+//
+//                         $this->currentFile->addError($error, $errorPos);
+//                     }
                 } else {
                     // We must have an extra parameter comment.
                     $error = 'Superfluous doc comment at position '.$pos;
@@ -425,13 +426,14 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
 
             }//end foreach
 
-            if ($spaceBeforeVar !== 1 && $spaceBeforeVar !== 10000 && $spaceBeforeComment !== 10000) {
-                $error = 'Expected 1 space after the longest type';
+//            if ($spaceBeforeVar !== 1 && $spaceBeforeVar !== 10000 && $spaceBeforeComment !== 10000) {
+            if ($spaceBeforeVar < 1 && $spaceBeforeVar > 4 && $spaceBeforeVar !== 10000 && $spaceBeforeComment !== 10000) {
+                $error = 'Expected 1-4 spaces after the longest type';
                 $this->currentFile->addError($error, $longestType);
             }
 
-            if ($spaceBeforeComment !== 1 && $spaceBeforeComment !== 10000) {
-                $error = 'Expected 1 space after the longest variable name';
+            if ($spaceBeforeComment < 1 && $spaceBeforeComment > 4 && $spaceBeforeComment !== 10000) {
+                $error = 'Expected 1-4 spaces after the longest variable name';
                 $this->currentFile->addError($error, $longestVar);
             }
 

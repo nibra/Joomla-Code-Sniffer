@@ -55,11 +55,11 @@ class Joomla_Sniffs_ControlStructures_ControlSignatureSniff extends PHP_CodeSnif
                 'do {EOL...} while (...);EOL',
                 'while (...) {EOL',
                 'for (...) {EOL',
-                'if (...) {EOL',
+                'if (...)EOL{EOL',
                 'foreach (...) {EOL',
-                '} else if (...) {EOL',
-                '} elseif (...) {EOL',
-                '} else {EOL',
+                '}EOLelse if (...)EOL{EOL',
+                '}EOLelseifEOL(...) {EOL',
+                '}EOLelseEOL{EOL',
                 'do {EOL',
                );
 

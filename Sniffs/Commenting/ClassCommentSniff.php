@@ -394,7 +394,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
 
         foreach ($indentation as $indentInfo) {
             if ($indentInfo['space'] !== 0
-                && $indentInfo['space'] !== ($longestTag + 1)
+                && $indentInfo['space'] > ($longestTag + 4)
             ) {
                 $expected = (($longestTag - strlen($indentInfo['tag'])) + 1);
                 $space    = ($indentInfo['space'] - strlen($indentInfo['tag']));
