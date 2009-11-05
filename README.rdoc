@@ -37,13 +37,10 @@ Further documentation on the use of phpcs can be found at: http://pear.php.net/p
 == Revision History
 
 	* 0.2 -- Basic functionality complete
+	* 0.3 -- Sniffs different if structure and @param element layout
 
 == To Do
 
-This is early in the development of this extension, and we need to be sure it covers all relevant rules. Here's what I <strong>know</strong> is missing. Feel free to contact me with more.
-
-	* Enforce @abstract doc block comment for abstract classes and methods
-	* Enforce @static doc block comment for static methods
-	* Enforce @access private doc block comment for private methods
+This is early in the development of this extension, and we need to be sure it covers all relevant rules. Discussion involving it takes place from time to time on the Joomla! Framework Development Google Group.
 
 Feel free to chime in with other ideas.
