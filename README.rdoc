@@ -26,11 +26,17 @@ The Joomla development team agreed on this standard (http://docs.joomla.org/Codi
 
 ==Installation
 
-First you'll need to install phpcs (http://pear.php.net/package/PHP_CodeSniffer/download/). Then download and unzip this repository, and copy the contents of it into /path/to/PHP_CodeSniffer/Standards/Joomla.
+First you'll need to install phpcs (http://pear.php.net/package/PHP_CodeSniffer/download/). This set of files is intended to work with phpcs version 1.3, so behavior with any other version is undefined.
+
+Then download and unzip this repository, and copy the contents of it into /path/to/PHP_CodeSniffer/Standards/Joomla. (The path on my system is /usr/lib/php/PHP/PHP_CodeSniffer but it varies from system to system. Use 
+
+<tt>pear config-get php_dir</tt>
+
+to find out where the PEAR directory is on your system, then add "/PHP/PHP_CodeSniffer" to it.)
 
 Then you invoke the custom standard by
 
-<tt>phpcs --standard=Joomla file/to/sniff</tt>
+<tt>phpcs --standard=Joomla --tab-width=4 file/to/sniff</tt>
 
 Further documentation on the use of phpcs can be found at: http://pear.php.net/package/PHP_CodeSniffer/docs
 
@@ -38,9 +44,9 @@ Further documentation on the use of phpcs can be found at: http://pear.php.net/p
 
 	* 0.2 -- Basic functionality complete
 	* 0.3 -- Sniffs different if structure and @param element layout
+	* 0.9 -- Adheres to revised Joomla Coding Standard
 
 == To Do
 
-This is early in the development of this extension, and we need to be sure it covers all relevant rules. Discussion involving it takes place from time to time on the Joomla! Framework Development Google Group.
-
-Feel free to chime in with other ideas.
+	* publish the tests
+	* write and publish doc files

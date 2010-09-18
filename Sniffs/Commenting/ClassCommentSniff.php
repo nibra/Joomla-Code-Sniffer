@@ -46,7 +46,7 @@ if (class_exists('Joomla_Sniffs_Commenting_FileCommentSniff', true) === false) {
  * @author    Marc McIntyre <mmcintyre@squiz.net>
  * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
  * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.2.0
+ * @version   Release: 1.3.0RC1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commenting_FileCommentSniff
@@ -81,22 +81,22 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                        'copyright'  => array(
                                         'required'       => false,
                                         'allow_multiple' => true,
-                                        'order_text'     => 'follows @author (if used) or @subpackage (if used) or @package',
+                                        'order_text'     => 'follows @author',
                                        ),
                        'license'    => array(
                                         'required'       => false,
                                         'allow_multiple' => false,
-                                        'order_text'     => 'follows @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
+                                        'order_text'     => 'follows @copyright (if used) or @author',
                                        ),
                        'version'    => array(
                                         'required'       => false,
                                         'allow_multiple' => false,
-                                        'order_text'     => 'follows @license (if used) or @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
+                                        'order_text'     => 'follows @license',
                                        ),
                        'link'       => array(
                                         'required'       => false,
                                         'allow_multiple' => true,
-                                        'order_text'     => 'follows @version (if used) or @license (if used) or @copyright (if used) or @author (if used) or @subpackage (if used) or @package',
+                                        'order_text'     => 'follows @version',
                                        ),
                        'see'        => array(
                                         'required'       => false,
@@ -143,25 +143,26 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
     {
         $this->currentFile = $phpcsFile;
 
-        $tokens = $phpcsFile->getTokens();
-        $type   = strtolower($tokens[$stackPtr]['content']);
-        $find   = array(
-                   T_ABSTRACT,
-                   T_WHITESPACE,
-                   T_FINAL,
-                  );
+        $tokens    = $phpcsFile->getTokens();
+        $type      = strtolower($tokens[$stackPtr]['content']);
+        $errorData = array($type);
+        $find      = array(
+                      T_ABSTRACT,
+                      T_WHITESPACE,
+                      T_FINAL,
+                     );
 
         // Extract the class comment docblock.
         $commentEnd = $phpcsFile->findPrevious($find, ($stackPtr - 1), null, true);
 
         if ($commentEnd !== false && $tokens[$commentEnd]['code'] === T_COMMENT) {
-            $error = "You must use \"/**\" style comments for a $type comment";
-            $phpcsFile->addError($error, $stackPtr);
+            $error = 'You must use "/**" style comments for a %s comment';
+            $phpcsFile->addError($error, $stackPtr, 'WrongStyle', $errorData);
             return;
         } else if ($commentEnd === false
             || $tokens[$commentEnd]['code'] !== T_DOC_COMMENT
         ) {
-            $phpcsFile->addError("Missing $type doc comment", $stackPtr);
+            $phpcsFile->addError('Missing %s doc comment', $stackPtr, 'Missing', $errorData);
             return;
         }
 
@@ -190,8 +191,8 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                         if ($newlineToken !== false) {
                             // Blank line between the class and the doc block.
                             // The doc block is most likely a file comment.
-                            $error = "Missing $type doc comment";
-                            $phpcsFile->addError($error, ($stackPtr + 1));
+                            $error = 'Missing %s doc comment';
+                            $phpcsFile->addError($error, ($stackPtr + 1), 'Missing', $errorData);
                             return;
                         }
                     }//end if
@@ -210,14 +211,14 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             $this->commentParser->parse();
         } catch (PHP_CodeSniffer_CommentParser_ParserException $e) {
             $line = ($e->getLineWithinComment() + $commentStart);
-            $phpcsFile->addError($e->getMessage(), $line);
+            $phpcsFile->addError($e->getMessage(), $line, 'FailedParse');
             return;
         }
 
         $comment = $this->commentParser->getComment();
         if (is_null($comment) === true) {
-            $error = ucfirst($type).' doc comment is empty';
-            $phpcsFile->addError($error, $commentStart);
+            $error = 'Doc comment is empty for %s';
+            $phpcsFile->addError($error, $commentStart, 'Empty', $errorData);
             return;
         }
 
@@ -228,7 +229,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
         if ($short !== '' && $newlineSpan > 0) {
             $line  = ($newlineSpan > 1) ? 'newlines' : 'newline';
             $error = "Extra $line found before $type comment short description";
-            $phpcsFile->addError($error, ($commentStart + 1));
+            $phpcsFile->addError($error, ($commentStart + 1), 'SpacingBeforeShort', $errorData);
         }
 
         $newlineCount = (substr_count($short, $phpcsFile->eolChar) + 1);
@@ -239,8 +240,8 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             $between        = $comment->getWhiteSpaceBetween();
             $newlineBetween = substr_count($between, $phpcsFile->eolChar);
             if ($newlineBetween !== 2) {
-                $error = "There must be exactly one blank line between descriptions in $type comments";
-                $phpcsFile->addError($error, ($commentStart + $newlineCount + 1));
+                $error = 'There must be exactly one blank line between descriptions in %s comments';
+                $phpcsFile->addError($error, ($commentStart + $newlineCount + 1), 'SpacingAfterShort', $errorData);
             }
 
             $newlineCount += $newlineBetween;
@@ -251,12 +252,12 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
         if (count($tags) > 1) {
             $newlineSpan = $comment->getNewlineAfter();
             if ($newlineSpan !== 2) {
-                $error = "There must be exactly one blank line before the tags in $type comments";
+                $error = 'There must be exactly one blank line before the tags in %s comments';
                 if ($long !== '') {
                     $newlineCount += (substr_count($long, $phpcsFile->eolChar) - $newlineSpan + 1);
                 }
 
-                $phpcsFile->addError($error, ($commentStart + $newlineCount));
+                $phpcsFile->addError($error, ($commentStart + $newlineCount), 'SpacingBeforeTags', $errorData);
                 $short = rtrim($short, $phpcsFile->eolChar.' ');
             }
         }
@@ -432,10 +433,11 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             $matches = array();
             if (empty($content) === true) {
                 $error = 'Content missing for @version tag in doc comment';
-                $this->currentFile->addError($error, $errorPos);
+                $this->currentFile->addError($error, $errorPos, 'EmptyVersion');
             } else if ((strstr($content, 'Release:') === false)) {
-                $error = "Invalid version \"$content\" in doc comment; consider \"Release: <package_version>\" instead";
-                $this->currentFile->addWarning($error, $errorPos);
+                $error = 'Invalid version "%s" in doc comment; consider "Release: <package_version>" instead';
+                $data  = array($content);
+                $this->currentFile->addWarning($error, $errorPos, 'InvalidVersion', $data);
             }
         }
 
