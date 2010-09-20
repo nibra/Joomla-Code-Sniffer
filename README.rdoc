@@ -49,4 +49,3 @@ Further documentation on the use of phpcs can be found at: http://pear.php.net/p
 == To Do
 
 	* publish the tests
-	* write and publish doc files
