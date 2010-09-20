@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<ruleset name="Joomla">
+ <description>The coding standard for Joomla.</description>
+ <exclude-pattern>*/Tests/*</exclude-pattern>
+
+ <!-- Include the whole PEAR standard -->
+ <rule ref="PEAR">
+  <exclude name="Generic.Files.LineLength"/>
+  <exclude name="PEAR.WhiteSpace.ScopeIndent"/>
+  <exclude name="PEAR.Commenting.FileComment"/>
+  <exclude name="PEAR.Commenting.ClassComment"/>
+  <exclude name="PEAR.Commenting.FunctionComment"/>
+ </rule>
+
+ <rule ref="Generic.WhiteSpace.ScopeIndent"/>
+
+ <!-- Lines can be 85 chars long, but only show errors after 160 -->
+ <rule ref="Generic.Files.LineLength">
+  <properties>
+   <property name="lineLimit" value="85"/>
+   <property name="absoluteLineLimit" value="160"/>
+  </properties>
+ </rule>
+
+</ruleset>
