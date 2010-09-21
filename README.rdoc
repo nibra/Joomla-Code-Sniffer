@@ -40,12 +40,15 @@ Then you invoke the custom standard by
 
 Further documentation on the use of phpcs can be found at: http://pear.php.net/package/PHP_CodeSniffer/docs
 
+==Unit Testing Note
+
+The PHPCodeSniffer unit testing structure is unable to handle changes from the default configuration, so most unit tests written that depend upon that (such as the SwitchDeclarationSniff) will fail. This is caused by the fact the Joomla standard currently permits, even prefers, tabs for indents, rather than spaces, and phpcs doesn't seem to be able to handle that without configuration options, and the unit testing framework as it exists prohibits that.
+
+Therefore those functions have not been unit tested, and instead been tested the old-fashioned way, by supplying test files to the sniffer and examining results. If you find a bug there, post it to the tracker.
+
 == Revision History
 
 	* 0.2 -- Basic functionality complete
 	* 0.3 -- Sniffs different if structure and @param element layout
 	* 0.9 -- Adheres to revised Joomla Coding Standard
-
-== To Do
-
-	* publish the tests
+	* 1.0 -- Released with Unit tests (such as they are)
