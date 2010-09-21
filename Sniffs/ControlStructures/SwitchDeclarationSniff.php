@@ -96,7 +96,7 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
                 $phpcsFile->addError($error, $nextCase);
             }
 
-            if ($tokens[$nextCase]['column'] !== $caseAlignment) { echo $tokens[$nextCase]['column'] . "!==" . $caseAlignment . "\n";
+            if ($tokens[$nextCase]['column'] !== $caseAlignment) {
                 $error = 'CASE keyword must be indented 4 spaces from SWITCH keyword';
                 $phpcsFile->addError($error, $nextCase, 'CaseIndent');
             }
