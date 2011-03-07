@@ -713,7 +713,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             $content  = $copyright->getContent();
             if ($content !== '') {
                 $matches = array();
-                if (preg_match('/^Copyright \(C\) ([0-9]{4})[ ]?(.{1})[ ]?([0-9]{4})? (.+)$/', $content, $matches) !== 0) {
+                if (preg_match('/^Copyright \(C\) ([0-9]{4})([ ]?(.{1})[ ]?([0-9]{4}))? (.+)$/', $content, $matches) !== 0) {
                     // Check earliest-latest year order.
                     if ($matches[2] !== '') {
                         if ($matches[2] !== '-') {
