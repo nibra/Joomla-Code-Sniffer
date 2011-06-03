@@ -4,13 +4,13 @@
  *
  * PHP version 5
  *
- * @category  	PHP
- * @package   	PHP_CodeSniffer
- * @author    	Paladin <arlen.walker@gmail.com>
- * @copyright	Copyright (C) 2010 Paladin Web Services. All rights reserved. 
- * @license   	http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   	Git: $Id: ControlSignatureUnitTest.php 226877 2007-01-10 03:14:44Z squiz $
- * @link      	http://pear.php.net/package/PHP_CodeSniffer
+ * @category  PHP
+ * @package   PHP_CodeSniffer
+ * @author    Paladin <arlen.walker@gmail.com>
+ * @copyright 2010 Paladin Web Services. All rights reserved.
+ * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
+ * @version   Git: $Id: ControlSignatureUnitTest.php 226877 2007-01-10 03:14:44Z squiz $
+ * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
 /**
@@ -21,8 +21,8 @@
  *
  * @category  PHP
  * @package   PHP_CodeSniffer
- * @author    	Paladin <arlen.walker@gmail.com>
- * @copyright	Copyright (C) 2010 Paladin Web Services. All rights reserved. 
+ * @author    Paladin <arlen.walker@gmail.com>
+ * @copyright 2010 Paladin Web Services. All rights reserved.
  * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
  * @version   Release: 1.3.0RC1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
