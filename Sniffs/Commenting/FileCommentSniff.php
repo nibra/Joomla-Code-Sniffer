@@ -1,6 +1,6 @@
 <?php
 /**
- * Parses and verifies the doc comments for files. (Changed slightly from PEAR sniffer)
+ * Parses and verifies the doc comments for files.
  *
  * PHP version 5
  *
@@ -11,18 +11,18 @@
  * @author    Marc McIntyre <mmcintyre@squiz.net>
  * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
  * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   CVS: $Id: FileCommentSniff.php 275485 2009-02-10 06:01:46Z squiz $
+ * @version   CVS: $Id: FileCommentSniff.php 301632 2010-07-28 01:57:56Z squiz $
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
-if (class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true) === false) {
+if (!class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true)) {
     throw new PHP_CodeSniffer_Exception('Class PHP_CodeSniffer_CommentParser_ClassCommentParser not found');
 }
 
 /**
  * Parses and verifies the doc comments for files.
  *
- * Verifies that :
+ * Verifies that:
  * <ul>
  *  <li>A doc comment exists.</li>
  *  <li>There is a blank newline after the short description.</li>
@@ -41,90 +41,76 @@ if (class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true) === f
  * @author    Marc McIntyre <mmcintyre@squiz.net>
  * @copyright 2006 Squiz Pty Ltd (ABN 77 084 670 600)
  * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
- * @version   Release: 1.3.0RC1
+ * @version   Release: 1.3.0RC2
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
 class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
 {
-
-    /**
-     * The header comment parser for the current file.
-     *
-     * @var PHP_CodeSniffer_Comment_Parser_ClassCommentParser
-     */
+    /** @var PHP_CodeSniffer_Comment_Parser_ClassCommentParser The header comment parser for the current file. */
     protected $commentParser = null;
 
-    /**
-     * The current PHP_CodeSniffer_File object we are processing.
-     *
-     * @var PHP_CodeSniffer_File
-     */
+    /** @var PHP_CodeSniffer_File The current PHP_CodeSniffer_File object we are processing. */
     protected $currentFile = null;
 
-    /**
-     * Tags in correct order and related info.
-     *
-     * @var array
-     */
+    /** @var array Tags in correct order and related info. */
     protected $tags = array(
-                       'version'    => array(
-                                        'required'       => true,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'precedes @category, @package, @subpackage and @author',
-                                       ),
-                       'category'   => array(
-                                        'required'       => false,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @version',
-                                       ),
-                       'package'    => array(
-                                        'required'       => true,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @category and @version',
-                                       ),
-                       'subpackage' => array(
-                                        'required'       => false,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @package',
-                                       ),
-                       'author'     => array(
-                                        'required'       => false,
-                                        'allow_multiple' => true,
-                                        'order_text'     => 'follows @category (if used) @subpackage (if used) or @package',
-                                       ),
-                       'copyright'  => array(
-                                        'required'       => true,
-                                        'allow_multiple' => true,
-                                        'order_text'     => 'follows @author',
-                                       ),
-                       'license'    => array(
-                                        'required'       => true,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @copyright (if used) or @author',
-                                       ),
-                       'link'       => array(
-                                        'required'       => false,
-                                        'allow_multiple' => true,
-                                        'order_text'     => 'follows @version',
-                                       ),
-                       'see'        => array(
-                                        'required'       => false,
-                                        'allow_multiple' => true,
-                                        'order_text'     => 'follows @link',
-                                       ),
-                       'since'      => array(
-                                        'required'       => false,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @see (if used) or @link',
-                                       ),
-                       'deprecated' => array(
-                                        'required'       => false,
-                                        'allow_multiple' => false,
-                                        'order_text'     => 'follows @since (if used) or @see (if used) or @link',
-                                       ),
-                );
-
+        'version' => array(
+            'required' => false,
+            'allow_multiple' => false,
+            'order_text' => 'must be first',
+        ),
+        'category' => array(
+            'required' => false,
+            'allow_multiple' => false,
+            'order_text' => 'precedes @package',
+        ),
+        'package' => array(
+            'required' => true,
+            'allow_multiple' => false,
+            'order_text' => 'follows @category',
+        ),
+        'subpackage' => array(
+            'required' => false,
+            'allow_multiple' => false,
+            'order_text' => 'follows @package',
+        ),
+        'author' => array(
+            'required' => false,
+            'allow_multiple' => true,
+            'order_text' => 'follows @subpackage (if used) or @package',
+        ),
+        'copyright' => array(
+            'required' => true,
+            'allow_multiple' => true,
+            'order_text' => 'follows @author (if used) or @subpackage (if used) or @package',
+        ),
+        'license' => array(
+            'required' => true,
+            'allow_multiple' => false,
+            'order_text' => 'follows @copyright',
+        ),
+        'link' => array(
+            'required' => false,
+            'allow_multiple' => true,
+            'order_text' => 'follows @version',
+        ),
+        'see' => array(
+            'required' => false,
+            'allow_multiple' => true,
+            'order_text' => 'follows @link (if used) or @version (if used) or @license',
+        ),
+        'since' => array(
+            'required' => false,
+            'allow_multiple' => false,
+            'order_text' => 'follows @see (if used) or @link (if used) or @version (if used) or @license',
+        ),
+        'deprecated' => array(
+            'required' => false,
+            'allow_multiple' => false,
+            'order_text' => 'follows @since (if used) or @see (if used) or @link (if used) or @version (if used) or @license',
+        ),
+    );
 
     /**
      * Returns an array of tokens this test wants to listen for.
@@ -134,9 +120,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
     public function register()
     {
         return array(T_OPEN_TAG);
-
-    }//end register()
-
+    }
 
     /**
      * Processes this test, when one of its tokens is encountered.
@@ -161,87 +145,57 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         $tokens = $phpcsFile->getTokens();
 
         // Find the next non whitespace token.
-        $commentStart
-            = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), null, true);
+        $commentStart = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), null, true);
 
         // Allow declare() statements at the top of the file.
         if ($tokens[$commentStart]['code'] === T_DECLARE) {
             $semicolon = $phpcsFile->findNext(T_SEMICOLON, ($commentStart + 1));
-            $commentStart
-                = $phpcsFile->findNext(T_WHITESPACE, ($semicolon + 1), null, true);
+            $commentStart = $phpcsFile->findNext(T_WHITESPACE, ($semicolon + 1), null, true);
         }
 
         // Ignore vim header.
         if ($tokens[$commentStart]['code'] === T_COMMENT) {
             if (strstr($tokens[$commentStart]['content'], 'vim:') !== false) {
-                $commentStart = $phpcsFile->findNext(
-                    T_WHITESPACE,
-                    ($commentStart + 1),
-                    null,
-                    true
-                );
+                $commentStart = $phpcsFile->findNext( T_WHITESPACE, ($commentStart + 1), null, true);
             }
         }
 
         $errorToken = ($stackPtr + 1);
-        if (isset($tokens[$errorToken]) === false) {
+        if (!isset($tokens[$errorToken])) {
             $errorToken--;
         }
 
         if ($tokens[$commentStart]['code'] === T_CLOSE_TAG) {
             // We are only interested if this is the first open tag.
             return;
-        } else if ($tokens[$commentStart]['code'] === T_COMMENT) {
+        } elseif ($tokens[$commentStart]['code'] === T_COMMENT) {
             $error = 'You must use "/**" style comments for a file comment';
             $phpcsFile->addError($error, $errorToken, 'WrongStyle');
             return;
-        } else if ($commentStart === false
-            || $tokens[$commentStart]['code'] !== T_DOC_COMMENT
-        ) {
+        } elseif ($commentStart === false || $tokens[$commentStart]['code'] !== T_DOC_COMMENT) {
             $phpcsFile->addError('Missing file doc comment', $errorToken, 'Missing');
             return;
         } else {
-
             // Extract the header comment docblock.
-            $commentEnd = $phpcsFile->findNext(
-                T_DOC_COMMENT,
-                ($commentStart + 1),
-                null,
-                true
-            );
-
+            $commentEnd = $phpcsFile->findNext(T_DOC_COMMENT, ($commentStart + 1), null, true);
             $commentEnd--;
 
             // Check if there is only 1 doc comment between the
             // open tag and class token.
-            $nextToken   = array(
-                            T_ABSTRACT,
-                            T_CLASS,
-                            T_FUNCTION,
-                            T_DOC_COMMENT,
-                           );
+            $nextToken = array(
+                T_ABSTRACT,
+                T_CLASS,
+                T_FUNCTION,
+                T_DOC_COMMENT,
+            );
 
             $commentNext = $phpcsFile->findNext($nextToken, ($commentEnd + 1));
-            if ($commentNext !== false
-                && $tokens[$commentNext]['code'] !== T_DOC_COMMENT
-            ) {
+            if ($commentNext !== false && $tokens[$commentNext]['code'] !== T_DOC_COMMENT) {
                 // Found a class token right after comment doc block.
-                $newlineToken = $phpcsFile->findNext(
-                    T_WHITESPACE,
-                    ($commentEnd + 1),
-                    $commentNext,
-                    false,
-                    $phpcsFile->eolChar
-                );
+                $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($commentEnd + 1), $commentNext, false, $phpcsFile->eolChar);
 
                 if ($newlineToken !== false) {
-                    $newlineToken = $phpcsFile->findNext(
-                        T_WHITESPACE,
-                        ($newlineToken + 1),
-                        $commentNext,
-                        false,
-                        $phpcsFile->eolChar
-                    );
+                    $newlineToken = $phpcsFile->findNext(T_WHITESPACE, ($newlineToken + 1), $commentNext, false, $phpcsFile->eolChar);
 
                     if ($newlineToken === false) {
                         // No blank line between the class token and the doc block.
@@ -251,7 +205,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                         return;
                     }
                 }
-            }//end if
+            }
 
             $comment = $phpcsFile->getTokensAsString(
                 $commentStart,
@@ -269,16 +223,16 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             }
 
             $comment = $this->commentParser->getComment();
-            if (is_null($comment) === true) {
+            if (is_null($comment)) {
                 $error = 'File doc comment is empty';
                 $phpcsFile->addError($error, $commentStart, 'Empty');
                 return;
             }
 
             // No extra newline before short description.
-            $short        = $comment->getShortComment();
+            $short = $comment->getShortComment();
             $newlineCount = 0;
-            $newlineSpan  = strspn($short, $phpcsFile->eolChar);
+            $newlineSpan = strspn($short, $phpcsFile->eolChar);
             if ($short !== '' && $newlineSpan > 0) {
                 $line  = ($newlineSpan > 1) ? 'newlines' : 'newline';
                 $error = "Extra $line found before file comment short description";
@@ -289,8 +243,8 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
 
             // Exactly one blank line between short and long description.
             $long = $comment->getLongComment();
-            if (empty($long) === false) {
-                $between        = $comment->getWhiteSpaceBetween();
+            if (!empty($long)) {
+                $between = $comment->getWhiteSpaceBetween();
                 $newlineBetween = substr_count($between, $phpcsFile->eolChar);
                 if ($newlineBetween !== 2) {
                     $error = 'There must be exactly one blank line between descriptions in file comment';
@@ -300,9 +254,9 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 $newlineCount += $newlineBetween;
             }
 
-            // Exactly one blank line before tags.
+            // Exactly one blank line before tags if short description is present.
             $tags = $this->commentParser->getTagOrders();
-            if (count($tags) > 1) {
+            if (count($tags) > 1 && $short !== '' && $newlineSpan > 0) {
                 $newlineSpan = $comment->getNewlineAfter();
                 if ($newlineSpan !== 2) {
                     $error = 'There must be exactly one blank line before the tags in file comment';
@@ -311,19 +265,13 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                     }
 
                     $phpcsFile->addError($error, ($commentStart + $newlineCount), 'SpacingBeforeTags');
-                    $short = rtrim($short, $phpcsFile->eolChar.' ');
+                    $short = rtrim($short, $phpcsFile->eolChar . ' ');
                 }
             }
-
-            // Check the PHP Version.
             $this->processPHPVersion($commentStart, $commentEnd, $long);
-
-            // Check each tag.
             $this->processTags($commentStart, $commentEnd);
-        }//end if
-
-    }//end process()
-
+        }
+    }
 
     /**
      * Check that the PHP version is specified.
@@ -336,13 +284,11 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
      */
     protected function processPHPVersion($commentStart, $commentEnd, $commentText)
     {
-        if (strstr(strtolower($commentText), 'php version') === false) {
+        if (!preg_match('~php version \d~im', $commentText)) {
             $error = 'PHP version not specified';
-             $this->currentFile->addWarning($error, $commentEnd, 'MissingVersion');
+            $this->currentFile->addWarning($error, $commentEnd, 'MissingVersion');
         }
-
-    }//end processPHPVersion()
-
+    }
 
     /**
      * Processes each required or optional tag.
@@ -354,40 +300,41 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
      */
     protected function processTags($commentStart, $commentEnd)
     {
-        $docBlock    = (get_class($this) === 'Joomla_Sniffs_Commenting_FileCommentSniff') ? 'file' : 'class';
-        $foundTags   = $this->commentParser->getTagOrders();
-        $orderIndex  = 0;
+        $docBlock = (get_class($this) === 'Joomla_Sniffs_Commenting_FileCommentSniff')
+            ? 'file' : 'class';
+        $foundTags = $this->commentParser->getTagOrders();
+        $orderIndex = 0;
         $indentation = array();
-        $longestTag  = 0;
-        $errorPos    = 0;
+        $longestTag = 0;
+        $errorPos = 0;
 
         foreach ($this->tags as $tag => $info) {
 
             // Required tag missing.
-            if ($info['required'] === true && in_array($tag, $foundTags) === false) {
+            if ($info['required'] === true && !in_array($tag, $foundTags)) {
                 $error = 'Missing @%s tag in %s comment';
-                $data  = array(
-                              $tag,
-                              $docBlock,
-                             );
+                $data = array(
+                    $tag,
+                    $docBlock,
+                );
                 $this->currentFile->addError($error, $commentEnd, 'MissingTag', $data);
                 continue;
             }
 
-             // Get the line number for current tag.
+            // Get the line number for current tag.
             $tagName = ucfirst($tag);
             if ($info['allow_multiple'] === true) {
                 $tagName .= 's';
             }
 
-            $getMethod  = 'get'.$tagName;
+            $getMethod = 'get' . $tagName;
             $tagElement = $this->commentParser->$getMethod();
-            if (is_null($tagElement) === true || empty($tagElement) === true) {
+            if (empty($tagElement)) {
                 continue;
             }
 
             $errorPos = $commentStart;
-            if (is_array($tagElement) === false) {
+            if (!is_array($tagElement)) {
                 $errorPos = ($commentStart + $tagElement->getLine());
             }
 
@@ -398,21 +345,21 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 // Multiple occurance not allowed.
                 if ($info['allow_multiple'] === false) {
                     $error = 'Only 1 @%s tag is allowed in a %s comment';
-                    $data  = array(
-                              $tag,
-                              $docBlock,
-                             );
+                    $data = array(
+                        $tag,
+                        $docBlock,
+                    );
                     $this->currentFile->addError($error, $errorPos, 'DuplicateTag', $data);
                 } else {
                     // Make sure same tags are grouped together.
-                    $i     = 0;
+                    $i = 0;
                     $count = $foundIndexes[0];
                     foreach ($foundIndexes as $index) {
                         if ($index !== $count) {
                             $errorPosIndex
                                 = ($errorPos + $tagElement[$i]->getLine());
                             $error = '@%s tags must be grouped together';
-                            $data  = array($tag);
+                            $data = array($tag);
                             $this->currentFile->addError($error, $errorPosIndex, 'TagsNotGrouped', $data);
                         }
 
@@ -420,21 +367,21 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                         $count++;
                     }
                 }
-            }//end if
+            }
 
             // Check tag order.
             if ($foundIndexes[0] > $orderIndex) {
                 $orderIndex = $foundIndexes[0];
             } else {
-                if (is_array($tagElement) === true && empty($tagElement) === false) {
+                if (is_array($tagElement) && !empty($tagElement)) {
                     $errorPos += $tagElement[0]->getLine();
                 }
 
                 $error = 'The @%s tag is in the wrong order; the tag %s';
-                $data  = array(
-                          $tag,
-                          $info['order_text'],
-                         );
+                $data = array(
+                    $tag,
+                    $info['order_text'],
+                );
                 $this->currentFile->addError($error, $errorPos, 'WrongTagOrder', $data);
             }
 
@@ -444,27 +391,27 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 $longestTag = $len;
             }
 
-            if (is_array($tagElement) === true) {
+            if (is_array($tagElement)) {
                 foreach ($tagElement as $key => $element) {
                     $indentation[] = array(
-                                      'tag'   => $tag,
-                                      'space' => $this->getIndentation($tag, $element),
-                                      'line'  => $element->getLine(),
-                                     );
+                        'tag' => $tag,
+                        'space' => $this->getIndentation($tag, $element),
+                        'line' => $element->getLine(),
+                    );
                 }
             } else {
                 $indentation[] = array(
-                                  'tag'   => $tag,
-                                  'space' => $this->getIndentation($tag, $tagElement),
-                                 );
+                    'tag' => $tag,
+                    'space' => $this->getIndentation($tag, $tagElement),
+                );
             }
 
-            $method = 'process'.$tagName;
-            if (method_exists($this, $method) === true) {
+            $method = 'process' . $tagName;
+            if (method_exists($this, $method)) {
                 // Process each tag if a method is defined.
                 call_user_func(array($this, $method), $errorPos);
             } else {
-                if (is_array($tagElement) === true) {
+                if (is_array($tagElement)) {
                     foreach ($tagElement as $key => $element) {
                         $element->process(
                             $this->currentFile,
@@ -473,52 +420,50 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                         );
                     }
                 } else {
-                     $tagElement->process(
-                         $this->currentFile,
-                         $commentStart,
-                         $docBlock
-                     );
+                    $tagElement->process(
+                        $this->currentFile,
+                        $commentStart,
+                        $docBlock
+                    );
                 }
             }
-        }//end foreach
+        }
 
         foreach ($indentation as $indentInfo) {
             if ($indentInfo['space'] !== 0
-                && $indentInfo['space'] > ($longestTag + 4)
+                // Joomla change: allow for 2 space gap.
+                && $indentInfo['space'] !== ($longestTag + 2)
             ) {
                 $expected = (($longestTag - strlen($indentInfo['tag'])) + 1);
-                $space    = ($indentInfo['space'] - strlen($indentInfo['tag']));
-                $error    = '@%s tag comment indented incorrectly; expected %s spaces but found %s';
-                $data     = array(
-                             $indentInfo['tag'],
-                             $expected,
-                             $space,
-                            );
+                $space = ($indentInfo['space'] - strlen($indentInfo['tag']));
+                $error = '@%s tag comment indented incorrectly; expected %s spaces but found %s';
+                $data = array(
+                    $indentInfo['tag'],
+                    $expected,
+                    $space,
+                );
 
-                $getTagMethod = 'get'.ucfirst($indentInfo['tag']);
+                $getTagMethod = 'get' . ucfirst($indentInfo['tag']);
 
                 if ($this->tags[$indentInfo['tag']]['allow_multiple'] === true) {
                     $line = $indentInfo['line'];
                 } else {
                     $tagElem = $this->commentParser->$getTagMethod();
-                    $line    = $tagElem->getLine();
+                    $line = $tagElem->getLine();
                 }
 
                 $this->currentFile->addError($error, ($commentStart + $line), 'TagIndent', $data);
             }
         }
+    }
 
-    }//end processTags()
-
+    //end processTags()
 
     /**
      * Get the indentation information of each tag.
      *
-     * @param string                                   $tagName    The name of the
-     *                                                             doc comment
-     *                                                             element.
-     * @param PHP_CodeSniffer_CommentParser_DocElement $tagElement The doc comment
-     *                                                             element.
+     * @param string                                   $tagName    The name of the doc comment element.
+     * @param PHP_CodeSniffer_CommentParser_DocElement $tagElement The doc comment element.
      *
      * @return void
      */
@@ -535,9 +480,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         }
 
         return 0;
-
-    }//end getIndentation()
-
+    }
 
     /**
      * Process the category tag.
@@ -552,7 +495,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         if ($category !== null) {
             $content = $category->getContent();
             if ($content !== '') {
-                if (PHP_CodeSniffer::isUnderscoreName($content) !== true) {
+                if (!PHP_CodeSniffer::isUnderscoreName($content)) {
                     $newContent = str_replace(' ', '_', $content);
                     $nameBits   = explode('_', $newContent);
                     $firstBit   = array_shift($nameBits);
@@ -574,9 +517,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 $this->currentFile->addError($error, $errorPos, 'EmptyCategory');
             }
         }
-
-    }//end processCategory()
-
+    }
 
     /**
      * Process the package tag.
@@ -591,21 +532,21 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         if ($package !== null) {
             $content = $package->getContent();
             if ($content !== '') {
-                if (PHP_CodeSniffer::isUnderscoreName($content) !== true) {
+                if (!PHP_CodeSniffer::isUnderscoreName($content)) {
                     $newContent = str_replace(' ', '_', $content);
-                    $nameBits   = explode('_', $newContent);
-                    $firstBit   = array_shift($nameBits);
-                    $newName    = strtoupper($firstBit{0}).substr($firstBit, 1).'_';
+                    $nameBits = explode('_', $newContent);
+                    $firstBit = array_shift($nameBits);
+                    $newName = strtoupper($firstBit{0}) . substr($firstBit, 1) . '_';
                     foreach ($nameBits as $bit) {
-                        $newName .= strtoupper($bit{0}).substr($bit, 1).'_';
+                        $newName .= strtoupper($bit{0}) . substr($bit, 1) . '_';
                     }
 
-                    $error     = 'Package name "%s" is not valid; consider "%s" instead';
+                    $error = 'Package name "%s" is not valid; consider "%s" instead';
                     $validName = trim($newName, '_');
-                    $data      = array(
-                                  $content,
-                                  $validName,
-                                 );
+                    $data = array(
+                        $content,
+                        $validName,
+                    );
                     $this->currentFile->addError($error, $errorPos, 'InvalidPackage', $data);
                 }
             } else {
@@ -613,9 +554,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 $this->currentFile->addError($error, $errorPos, 'EmptyPackage');
             }
         }
-
-    }//end processPackage()
-
+    }
 
     /**
      * Process the subpackage tag.
@@ -630,14 +569,14 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         if ($package !== null) {
             $content = $package->getContent();
             if ($content !== '') {
-                if (PHP_CodeSniffer::isUnderscoreName($content) !== true) {
+                if (!PHP_CodeSniffer::isUnderscoreName($content)) {
                     $newContent = str_replace(' ', '_', $content);
                     $nameBits   = explode('_', $newContent);
                     $firstBit   = array_shift($nameBits);
                     $newName    = strtoupper($firstBit{0}).substr($firstBit, 1).'_';
                     foreach ($nameBits as $bit) {
                         $newName .= strtoupper($bit{0}).substr($bit, 1).'_';
-                    }
+                }
 
                     $error     = 'Subpackage name "%s" is not valid; consider "%s" instead';
                     $validName = trim($newName, '_');
@@ -652,9 +591,7 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
                 $this->currentFile->addError($error, $errorPos, 'EmptySubpackage');
             }
         }
-
-    }//end processSubpackage()
-
+    }
 
     /**
      * Process the author tag(s) that this header comment has.
@@ -670,32 +607,31 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
      */
     protected function processAuthors($commentStart)
     {
-         $authors = $this->commentParser->getAuthors();
+        $authors = $this->commentParser->getAuthors();
         // Report missing return.
-        if (empty($authors) === false) {
+        if (!empty($authors)) {
             foreach ($authors as $author) {
                 $errorPos = ($commentStart + $author->getLine());
-                $content  = $author->getContent();
+                $content = $author->getContent();
                 if ($content !== '') {
                     $local = '\da-zA-Z-_+';
                     // Dot character cannot be the first or last character
                     // in the local-part.
-                    $localMiddle = $local.'.\w';
-                    if (preg_match('/^([^<]*)\s+<(['.$local.']['.$localMiddle.']*['.$local.']@[\da-zA-Z][-.\w]*[\da-zA-Z]\.[a-zA-Z]{2,7})>$/', $content) === 0) {
+                    $localMiddle = $local . '.\w';
+                    if (preg_match('/^([^<]*)\s+<([' . $local . '][' . $localMiddle . ']*[' . $local . ']@[\da-zA-Z][-.\w]*[\da-zA-Z]\.[a-zA-Z]{2,7})>$/', $content) === 0) {
                         $error = 'Content of the @author tag must be in the form "Display Name <username@example.com>"';
                         $this->currentFile->addError($error, $errorPos, 'InvalidAuthors');
                     }
                 } else {
-                    $error    = 'Content missing for @author tag in %s comment';
-                    $docBlock = (get_class($this) === 'PEAR_Sniffs_Commenting_FileCommentSniff') ? 'file' : 'class';
-                    $data     = array($docBlock);
+                    $error = 'Content missing for @author tag in %s comment';
+                    $docBlock = (get_class($this) === 'PEAR_Sniffs_Commenting_FileCommentSniff')
+                        ? 'file' : 'class';
+                    $data = array($docBlock);
                     $this->currentFile->addError($error, $errorPos, 'EmptyAuthors', $data);
                 }
             }
         }
-
-    }//end processAuthors()
-
+    }
 
     /**
      * Process the copyright tags.
@@ -710,19 +646,19 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
         $copyrights = $this->commentParser->getCopyrights();
         foreach ($copyrights as $copyright) {
             $errorPos = ($commentStart + $copyright->getLine());
-            $content  = $copyright->getContent();
+            $content = $copyright->getContent();
             if ($content !== '') {
                 $matches = array();
-                if (preg_match('/^Copyright \(C\) ([0-9]{4})([ ]?(.{1})[ ]?([0-9]{4}))? (.+)$/', $content, $matches) !== 0) {
+                if (preg_match('/^.*?([0-9]{4})((.{1})([0-9]{4}))? (.+)$/', $content, $matches) !== 0) {
                     // Check earliest-latest year order.
-                    if ($matches[2] !== '') {
-                        if ($matches[2] !== '-') {
+                    if ($matches[3] !== '') {
+                        if ($matches[3] !== '-') {
                             $error = 'A hyphen must be used between the earliest and latest year';
                             $this->currentFile->addError($error, $errorPos, 'CopyrightHyphen');
                         }
 
-                        if ($matches[3] !== '' && $matches[3] < $matches[1]) {
-                            $error = "Invalid year span \"$matches[1]$matches[2]$matches[3]\" found; consider \"$matches[3]-$matches[1]\" instead";
+                        if ($matches[4] !== '' && $matches[4] < $matches[1]) {
+                            $error = "Invalid year span \"$matches[1]$matches[3]$matches[4]\" found; consider \"$matches[4]-$matches[1]\" instead";
                             $this->currentFile->addWarning($error, $errorPos, 'InvalidCopyright');
                         }
                     }
@@ -733,11 +669,9 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
             } else {
                 $error = '@copyright tag must contain a year and the name of the copyright holder';
                 $this->currentFile->addError($error, $errorPos, 'EmptyCopyright');
-            }//end if
-        }//end if
-
-    }//end processCopyrights()
-
+            }
+        }
+    }
 
     /**
      * Process the license tag.
@@ -749,17 +683,15 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
     protected function processLicense($errorPos)
     {
         $license = $this->commentParser->getLicense();
-        if ($license !== null) {
-            $value   = $license->getValue();
+        if (!is_null($license)) {
+            $value = $license->getValue();
             $comment = $license->getComment();
             if ($value === '' || $comment === '') {
                 $error = '@license tag must contain a URL and a license name';
                 $this->currentFile->addError($error, $errorPos, 'EmptyLicense');
             }
         }
-
-    }//end processLicense()
-
+    }
 
     /**
      * Process the version tag.
@@ -771,22 +703,18 @@ class Joomla_Sniffs_Commenting_FileCommentSniff implements PHP_CodeSniffer_Sniff
     protected function processVersion($errorPos)
     {
         $version = $this->commentParser->getVersion();
-        if ($version !== null) {
+        if (!is_null($version)) {
             $content = $version->getContent();
             $matches = array();
-            if (empty($content) === true) {
+            if (empty($content)) {
                 $error = 'Content missing for @version tag in file comment';
                 $this->currentFile->addError($error, $errorPos, 'EmptyVersion');
-            } else if (strstr($content, '$Id') === false) {
-                $error = 'Invalid version "$s" in file comment';
+            } elseif (!preg_match('~(SVN|CVS|Id):~', $content)) {
+                $error = 'Invalid version "%s" in file comment; consider "CVS: <cvs_id>" or "SVN: <svn_id>" instead';
                 $data = array($content);
                 $this->currentFile->addWarning($error, $errorPos, 'InvalidVersion', $data);
             }
         }
-
-    }//end processVersion()
-
-
-}//end class
-
+    }
+}
 ?>
