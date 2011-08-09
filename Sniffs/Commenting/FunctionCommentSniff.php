@@ -14,7 +14,7 @@
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
-if (class_exists('PHP_CodeSniffer_CommentParser_FunctionCommentParser', true) === false) {
+if (!class_exists('PHP_CodeSniffer_CommentParser_FunctionCommentParser', true)) {
     throw new PHP_CodeSniffer_Exception('Class PHP_CodeSniffer_CommentParser_FunctionCommentParser not found');
 }
 
@@ -56,7 +56,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
     private $_methodName = '';
 
     /**
-     * The position in the stack where the fucntion token was found.
+     * The position in the stack where the function token was found.
      *
      * @var int
      */
@@ -72,7 +72,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
     /**
      * The function comment parser for the current method.
      *
-     * @var PHP_CodeSniffer_Comment_Parser_FunctionCommentParser
+     * @var PHP_CodeSniffer_CommentParser_FunctionCommentParser
      */
     protected $commentParser = null;
 
@@ -83,7 +83,6 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
      */
     protected $currentFile = null;
 
-
     /**
      * Returns an array of tokens this test wants to listen for.
      *
@@ -92,9 +91,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
     public function register()
     {
         return array(T_FUNCTION);
-
-    }//end register()
-
+    }
 
     /**
      * Processes this test, when one of its tokens is encountered.
@@ -108,12 +105,12 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
     public function process(PHP_CodeSniffer_File $phpcsFile, $stackPtr)
     {
         $find = array(
-                 T_COMMENT,
-                 T_DOC_COMMENT,
-                 T_CLASS,
-                 T_FUNCTION,
-                 T_OPEN_TAG,
-                );
+            T_COMMENT,
+            T_DOC_COMMENT,
+            T_CLASS,
+            T_FUNCTION,
+            T_OPEN_TAG,
+        );
 
         $commentEnd = $phpcsFile->findPrevious($find, ($stackPtr - 1));
 
@@ -122,7 +119,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
         }
 
         $this->currentFile = $phpcsFile;
-        $tokens            = $phpcsFile->getTokens();
+        $tokens = $phpcsFile->getTokens();
 
         // If the token that we found was a class or a function, then this
         // function has no doc comment.
@@ -132,18 +129,20 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             $error = 'You must use "/**" style comments for a function comment';
             $phpcsFile->addError($error, $stackPtr, 'WrongStyle');
             return;
-        } else if ($code !== T_DOC_COMMENT) {
-            $phpcsFile->addError('Missing function doc comment', $stackPtr, 'Missing');
-            return;
+        } else {
+            if ($code !== T_DOC_COMMENT) {
+                $phpcsFile->addError('Missing function doc comment', $stackPtr, 'Missing');
+                return;
+            }
         }
 
         // If there is any code between the function keyword and the doc block
         // then the doc block is not for us.
-        $ignore    = PHP_CodeSniffer_Tokens::$scopeModifiers;
-        $ignore[]  = T_STATIC;
-        $ignore[]  = T_WHITESPACE;
-        $ignore[]  = T_ABSTRACT;
-        $ignore[]  = T_FINAL;
+        $ignore = PHP_CodeSniffer_Tokens::$scopeModifiers;
+        $ignore[] = T_STATIC;
+        $ignore[] = T_WHITESPACE;
+        $ignore[] = T_ABSTRACT;
+        $ignore[] = T_FINAL;
         $prevToken = $phpcsFile->findPrevious($ignore, ($stackPtr - 1), null, true);
         if ($prevToken !== $commentEnd) {
             $phpcsFile->addError('Missing function doc comment', $stackPtr, 'Missing');
@@ -163,7 +162,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
         // If the first T_OPEN_TAG is right before the comment, it is probably
         // a file comment.
         $commentStart = ($phpcsFile->findPrevious(T_DOC_COMMENT, ($commentEnd - 1), null, true) + 1);
-        $prevToken    = $phpcsFile->findPrevious(T_WHITESPACE, ($commentStart - 1), null, true);
+        $prevToken = $phpcsFile->findPrevious(T_WHITESPACE, ($commentStart - 1), null, true);
         if ($tokens[$prevToken]['code'] === T_OPEN_TAG) {
             // Is this the first open tag?
             if ($stackPtr === 0 || $phpcsFile->findPrevious(T_OPEN_TAG, ($prevToken - 1)) === false) {
@@ -172,7 +171,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             }
         }
 
-        $comment           = $phpcsFile->getTokensAsString($commentStart, ($commentEnd - $commentStart + 1));
+        $comment = $phpcsFile->getTokensAsString($commentStart, ($commentEnd - $commentStart + 1));
         $this->_methodName = $phpcsFile->getDeclarationName($stackPtr);
 
         try {
@@ -184,6 +183,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             return;
         }
 
+        /** @var PHP_CodeSniffer_CommentParser_CommentElement $comment */
         $comment = $this->commentParser->getComment();
         if (is_null($comment) === true) {
             $error = 'Function doc comment is empty';
@@ -196,11 +196,11 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
         $this->processThrows($commentStart);
 
         // No extra newline before short description.
-        $short        = $comment->getShortComment();
+        $short = $comment->getShortComment();
         $newlineCount = 0;
-        $newlineSpan  = strspn($short, $phpcsFile->eolChar);
+        $newlineSpan = strspn($short, $phpcsFile->eolChar);
         if ($short !== '' && $newlineSpan > 0) {
-            $line  = ($newlineSpan > 1) ? 'newlines' : 'newline';
+            $line = ($newlineSpan > 1) ? 'newlines' : 'newline';
             $error = "Extra $line found before function comment short description";
             $phpcsFile->addError($error, ($commentStart + 1), 'SpacingBeforeShort');
         }
@@ -210,7 +210,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
         // Exactly one blank line between short and long description.
         $long = $comment->getLongComment();
         if (empty($long) === false) {
-            $between        = $comment->getWhiteSpaceBetween();
+            $between = $comment->getWhiteSpaceBetween();
             $newlineBetween = substr_count($between, $phpcsFile->eolChar);
             if ($newlineBetween !== 2) {
                 $error = 'There must be exactly one blank line between descriptions in function comment';
@@ -231,12 +231,10 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                 }
 
                 $phpcsFile->addError($error, ($commentStart + $newlineCount), 'SpacingBeforeTags');
-                $short = rtrim($short, $phpcsFile->eolChar.' ');
+                $short = rtrim($short, $phpcsFile->eolChar . ' ');
             }
         }
-
-    }//end process()
-
+    }
 
     /**
      * Process any throw tags that this function comment has.
@@ -252,19 +250,18 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             return;
         }
 
+        /** @var PHP_CodeSniffer_CommentParser_PairElement $throw */
         foreach ($this->commentParser->getThrows() as $throw) {
 
             $exception = $throw->getValue();
-            $errorPos  = ($commentStart + $throw->getLine());
+            $errorPos = ($commentStart + $throw->getLine());
 
             if ($exception === '') {
                 $error = '@throws tag must contain the exception class name';
                 $this->currentFile->addError($error, $errorPos, 'EmptyThrows');
             }
         }
-
-    }//end processThrows()
-
+    }
 
     /**
      * Process the return comment of this function comment.
@@ -283,7 +280,7 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             $className = strtolower(ltrim($className, '_'));
         }
 
-        $methodName      = strtolower(ltrim($this->_methodName, '_'));
+        $methodName = strtolower(ltrim($this->_methodName, '_'));
         $isSpecialMethod = ($this->_methodName === '__construct' || $this->_methodName === '__destruct');
 
         if ($isSpecialMethod === false && $methodName !== $className) {
@@ -291,15 +288,15 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             if ($this->commentParser->getReturn() === null) {
                 $error = 'Missing @return tag in function comment';
                 $this->currentFile->addError($error, $commentEnd, 'MissingReturn');
-            } else if (trim($this->commentParser->getReturn()->getRawContent()) === '') {
-                $error    = '@return tag is empty in function comment';
-                $errorPos = ($commentStart + $this->commentParser->getReturn()->getLine());
-                $this->currentFile->addError($error, $errorPos, 'EmptyReturn');
+            } else {
+                if (trim($this->commentParser->getReturn()->getRawContent()) === '') {
+                    $error = '@return tag is empty in function comment';
+                    $errorPos = ($commentStart + $this->commentParser->getReturn()->getLine());
+                    $this->currentFile->addError($error, $errorPos, 'EmptyReturn');
+                }
             }
         }
-
-    }//end processReturn()
-
+    }
 
     /**
      * Process the function parameter comments.
@@ -313,35 +310,36 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
     {
         $realParams = $this->currentFile->getMethodParameters($this->_functionToken);
 
-        $params      = $this->commentParser->getParams();
+        $params = $this->commentParser->getParams();
         $foundParams = array();
 
         if (empty($params) === false) {
 
             $lastParm = (count($params) - 1);
             if (substr_count($params[$lastParm]->getWhitespaceAfter(), $this->currentFile->eolChar) !== 2) {
-                $error    = 'Last parameter comment requires a blank newline after it';
+                $error = 'Last parameter comment requires a blank newline after it';
                 $errorPos = ($params[$lastParm]->getLine() + $commentStart);
                 $this->currentFile->addError($error, $errorPos, 'SpacingAfterParams');
             }
 
             // Parameters must appear immediately after the comment.
             if ($params[0]->getOrder() !== 2) {
-                $error    = 'Parameters must appear immediately after the comment';
+                $error = 'Parameters must appear immediately after the comment';
                 $errorPos = ($params[0]->getLine() + $commentStart);
                 $this->currentFile->addError($error, $errorPos, 'SpacingBeforeParams');
             }
 
-            $previousParam      = null;
-            $spaceBeforeVar     = 10000;
+            $previousParam = null;
+            $spaceBeforeVar = 10000;
             $spaceBeforeComment = 10000;
-            $longestType        = 0;
-            $longestVar         = 0;
+            $longestType = 0;
+            $longestVar = 0;
 
+            /** @var PHP_CodeSniffer_CommentParser_ParameterElement $param */
             foreach ($params as $param) {
 
                 $paramComment = trim($param->getComment());
-                $errorPos     = ($param->getLine() + $commentStart);
+                $errorPos = ($param->getLine() + $commentStart);
 
                 // Make sure that there is only one space before the var type.
                 if (strlen($param->getWhitespaceBeforeType()) < 1) {
@@ -352,72 +350,75 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                 $spaceCount = substr_count($param->getWhitespaceBeforeVarName(), ' ');
                 if ($spaceCount < $spaceBeforeVar) {
                     $spaceBeforeVar = $spaceCount;
-                    $longestType    = $errorPos;
+                    $longestType = $errorPos;
                 }
 
                 $spaceCount = substr_count($param->getWhitespaceBeforeComment(), ' ');
 
                 if ($spaceCount < $spaceBeforeComment && $paramComment !== '') {
                     $spaceBeforeComment = $spaceCount;
-                    $longestVar         = $errorPos;
+                    $longestVar = $errorPos;
                 }
 
                 // Make sure they are in the correct order,
                 // and have the correct name.
                 $pos = $param->getPosition();
 
-                $paramName = ($param->getVarName() !== '') ? $param->getVarName() : '[ UNKNOWN ]';
+                $paramName = ($param->getVarName() !== '')
+                    ? $param->getVarName() : '[ UNKNOWN ]';
 
                 if ($previousParam !== null) {
-                    $previousName = ($previousParam->getVarName() !== '') ? $previousParam->getVarName() : 'UNKNOWN';
+                    $previousName = ($previousParam->getVarName() !== '')
+                        ? $previousParam->getVarName() : 'UNKNOWN';
 
                     // Check to see if the parameters align properly.
                     if ($param->alignsVariableWith($previousParam) === false) {
                         $error = 'The variable names for parameters %s (%s) and %s (%s) do not align';
-                        $data  = array(
-                                  $previousName,
-                                  ($pos - 1),
-                                  $paramName,
-                                  $pos,
-                                 );
+                        $data = array(
+                            $previousName,
+                            ($pos - 1),
+                            $paramName,
+                            $pos,
+                        );
                         $this->currentFile->addError($error, $errorPos, 'ParameterNamesNotAligned', $data);
                     }
 
                     if ($param->alignsCommentWith($previousParam) === false) {
                         $error = 'The comments for parameters %s (%s) and %s (%s) do not align';
-                        $data  = array(
-                                  $previousName,
-                                  ($pos - 1),
-                                  $paramName,
-                                  $pos,
-                                 );
+                        $data = array(
+                            $previousName,
+                            ($pos - 1),
+                            $paramName,
+                            $pos,
+                        );
                         $this->currentFile->addError($error, $errorPos, 'ParameterCommentsNotAligned', $data);
                     }
-                }//end if
+                }
+                //end if
 
                 // Make sure the names of the parameter comment matches the
                 // actual parameter.
                 if (isset($realParams[($pos - 1)]) === true) {
-                    $realName      = $realParams[($pos - 1)]['name'];
+                    $realName = $realParams[($pos - 1)]['name'];
                     $foundParams[] = $realName;
 
                     // Append ampersand to name if passing by reference.
                     if ($realParams[($pos - 1)]['pass_by_reference'] === true) {
-                        $realName = '&'.$realName;
+                        $realName = '&' . $realName;
                     }
 
                     if ($realName !== $paramName) {
                         $code = 'ParamNameNoMatch';
                         $data = array(
-                                    $paramName,
-                                    $realName,
-                                    $pos,
-                                );
+                            $paramName,
+                            $realName,
+                            $pos,
+                        );
 
-                        $error  = 'Doc comment for var %s does not match ';
+                        $error = 'Doc comment for var %s does not match ';
                         if (strtolower($paramName) === strtolower($realName)) {
                             $error .= 'case of ';
-                            $code   = 'ParamNameNoCaseMatch';
+                            $code = 'ParamNameNoCaseMatch';
                         }
 
                         $error .= 'actual variable name %s at position %s';
@@ -426,44 +427,42 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
                     }
                 } else {
                     // We must have an extra parameter comment.
-                    $error = 'Superfluous doc comment at position '.$pos;
+                    $error = 'Superfluous doc comment at position ' . $pos;
                     $this->currentFile->addError($error, $errorPos, 'ExtraParamComment');
                 }
 
                 if ($param->getVarName() === '') {
-                    $error = 'Missing parameter name at position '.$pos;
-                     $this->currentFile->addError($error, $errorPos, 'MissingParamName');
+                    $error = 'Missing parameter name at position ' . $pos;
+                    $this->currentFile->addError($error, $errorPos, 'MissingParamName');
                 }
 
                 if ($param->getType() === '') {
-                    $error = 'Missing type at position '.$pos;
+                    $error = 'Missing type at position ' . $pos;
                     $this->currentFile->addError($error, $errorPos, 'MissingParamType');
                 }
 
                 if ($paramComment === '') {
                     $error = 'Missing comment for param "%s" at position %s';
-                    $data  = array(
-                              $paramName,
-                              $pos,
-                             );
+                    $data = array(
+                        $paramName,
+                        $pos,
+                    );
                     $this->currentFile->addError($error, $errorPos, 'MissingParamComment', $data);
                 }
 
                 $previousParam = $param;
-
-            }//end foreach
+            }
 
             if ($spaceBeforeVar > 4 && $spaceBeforeVar !== 10000 && $spaceBeforeComment !== 10000) {
                 $error = 'Expected no more spaces than 1 tab after the longest type';
                 $this->currentFile->addError($error, $longestType, 'SpacingAfterLongType');
             }
 
-            if ($spaceBeforeComment >4 && $spaceBeforeComment !== 10000) {
+            if ($spaceBeforeComment > 4 && $spaceBeforeComment !== 10000) {
                 $error = 'Expected no more spaces than 1 tab after the longest variable name';
                 $this->currentFile->addError($error, $longestVar, 'SpacingAfterLongName');
             }
-
-        }//end if
+        }
 
         $realNames = array();
         foreach ($realParams as $realParam) {
@@ -480,13 +479,11 @@ class Joomla_Sniffs_Commenting_FunctionCommentSniff implements PHP_CodeSniffer_S
             }
 
             $error = 'Doc comment for "%s" missing';
-            $data  = array($neededParam);
+            $data = array($neededParam);
             $this->currentFile->addError($error, $errorPos, 'MissingParamTag', $data);
         }
+    }
 
-    }//end processParams()
-
-
-}//end class
+}
 
 ?>

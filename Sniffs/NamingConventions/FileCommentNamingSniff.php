@@ -51,7 +51,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
     /**
      * The header comment parser for the current file.
      *
-     * @var PHP_CodeSniffer_Comment_Parser_ClassCommentParser
+     * @var PHP_CodeSniffer_CommentParser_ClassCommentParser
      */
     protected $commentParser = null;
 
@@ -135,8 +135,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
     {
         return array(T_OPEN_TAG);
 
-    }//end register()
-
+    }
 
     /**
      * Processes this test, when one of its tokens is encountered.
@@ -251,8 +250,9 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                         return;
                     }
                 }
-            }//end if
+            }
 
+            /** @var PHP_CodeSniffer_CommentParser_CommentElement $comment */
             $comment = $phpcsFile->getTokensAsString(
                 $commentStart,
                 ($commentEnd - $commentStart + 1)
@@ -320,10 +320,9 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
 
             // Check each tag.
             $this->processTags($commentStart, $commentEnd);
-        }//end if
+        }
 
-    }//end process()
-
+    }
 
     /**
      * Check that the PHP version is specified.
@@ -341,7 +340,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
              $this->currentFile->addWarning($error, $commentEnd, 'MissingVersion');
         }
 
-    }//end processPHPVersion()
+    }
 
 
     /**
@@ -388,6 +387,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
 
             $errorPos = $commentStart;
             if (is_array($tagElement) === false) {
+                /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $tagElement */
                 $errorPos = ($commentStart + $tagElement->getLine());
             }
 
@@ -420,7 +420,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                         $count++;
                     }
                 }
-            }//end if
+            }
 
             // Check tag order.
             if ($foundIndexes[0] > $orderIndex) {
@@ -446,6 +446,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
 
             if (is_array($tagElement) === true) {
                 foreach ($tagElement as $key => $element) {
+                    /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $element */
                     $indentation[] = array(
                                       'tag'   => $tag,
                                       'space' => $this->getIndentation($tag, $element),
@@ -465,6 +466,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                 call_user_func(array($this, $method), $errorPos);
             } else {
                 if (is_array($tagElement) === true) {
+                    /** @var PHP_CodeSniffer_CommentParser_SingleElement $element */
                     foreach ($tagElement as $key => $element) {
                         $element->process(
                             $this->currentFile,
@@ -473,6 +475,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                         );
                     }
                 } else {
+                    /** @var PHP_CodeSniffer_CommentParser_SingleElement $tagElement */
                      $tagElement->process(
                          $this->currentFile,
                          $commentStart,
@@ -480,7 +483,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                      );
                 }
             }
-        }//end foreach
+        }
 
         foreach ($indentation as $indentInfo) {
             if ($indentInfo['space'] !== 0
@@ -500,6 +503,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                 if ($this->tags[$indentInfo['tag']]['allow_multiple'] === true) {
                     $line = $indentInfo['line'];
                 } else {
+                    /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $tagElem */
                     $tagElem = $this->commentParser->$getTagMethod();
                     $line    = $tagElem->getLine();
                 }
@@ -508,7 +512,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processTags()
+    }
 
 
     /**
@@ -520,23 +524,23 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
      * @param PHP_CodeSniffer_CommentParser_DocElement $tagElement The doc comment
      *                                                             element.
      *
-     * @return void
+     * @return integer Length of indentation
      */
     protected function getIndentation($tagName, $tagElement)
     {
         if ($tagElement instanceof PHP_CodeSniffer_CommentParser_SingleElement) {
+            /** @var PHP_CodeSniffer_CommentParser_SingleElement $tagElement */
             if ($tagElement->getContent() !== '') {
                 return (strlen($tagName) + substr_count($tagElement->getWhitespaceBeforeContent(), ' '));
             }
         } else if ($tagElement instanceof PHP_CodeSniffer_CommentParser_PairElement) {
+            /** @var PHP_CodeSniffer_CommentParser_PairElement $tagElement */
             if ($tagElement->getValue() !== '') {
                 return (strlen($tagName) + substr_count($tagElement->getWhitespaceBeforeValue(), ' '));
             }
         }
-
         return 0;
-
-    }//end getIndentation()
+    }
 
 
     /**
@@ -575,8 +579,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processCategory()
-
+    }
 
     /**
      * Process the package tag.
@@ -614,8 +617,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processPackage()
-
+    }
 
     /**
      * Process the subpackage tag.
@@ -653,8 +655,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processSubpackage()
-
+    }
 
     /**
      * Process the author tag(s) that this header comment has.
@@ -673,6 +674,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
          $authors = $this->commentParser->getAuthors();
         // Report missing return.
         if (empty($authors) === false) {
+            /** @var PHP_CodeSniffer_CommentParser_SingleElement $author */
             foreach ($authors as $author) {
                 $errorPos = ($commentStart + $author->getLine());
                 $content  = $author->getContent();
@@ -694,8 +696,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processAuthors()
-
+    }
 
     /**
      * Process the copyright tags.
@@ -708,6 +709,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
     protected function processCopyrights($commentStart)
     {
         $copyrights = $this->commentParser->getCopyrights();
+        /** @var PHP_CodeSniffer_CommentParser_SingleElement $copyright */
         foreach ($copyrights as $copyright) {
             $errorPos = ($commentStart + $copyright->getLine());
             $content  = $copyright->getContent();
@@ -733,11 +735,9 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             } else {
                 $error = '@copyright tag must contain a year and the name of the copyright holder';
                 $this->currentFile->addError($error, $errorPos, 'EmptyCopyright');
-            }//end if
-        }//end if
-
-    }//end processCopyrights()
-
+            }
+        }
+    }
 
     /**
      * Process the license tag.
@@ -758,8 +758,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
             }
         }
 
-    }//end processLicense()
-
+    }
 
     /**
      * Process the version tag.
@@ -783,10 +782,7 @@ class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer
                 $this->currentFile->addWarning($error, $errorPos, 'InvalidVersion', $data);
             }
         }
-
-    }//end processVersion()
-
-
-}//end class
+    }
+}
 
 ?>

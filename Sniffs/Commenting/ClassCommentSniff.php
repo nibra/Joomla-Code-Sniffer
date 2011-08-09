@@ -15,12 +15,12 @@
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
-if (class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true) === false) {
+if (!class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true)) {
     $error = 'Class PHP_CodeSniffer_CommentParser_ClassCommentParser not found';
     throw new PHP_CodeSniffer_Exception($error);
 }
 
-if (class_exists('Joomla_Sniffs_Commenting_FileCommentSniff', true) === false) {
+if (!class_exists('Joomla_Sniffs_Commenting_FileCommentSniff', true)) {
     $error = 'Class Joomla_Sniffs_Commenting_FileCommentSniff not found';
     throw new PHP_CodeSniffer_Exception($error);
 }
@@ -48,10 +48,13 @@ if (class_exists('Joomla_Sniffs_Commenting_FileCommentSniff', true) === false) {
  * @license   http://matrix.squiz.net/developer/tools/php_cs/licence BSD Licence
  * @version   Release: 1.3.0RC1
  * @link      http://pear.php.net/package/PHP_CodeSniffer
+ *
+ * @property  PHP_CodeSniffer_CommentParser_ClassCommentParser|PHP_CodeSniffer_CommentParser_AbstractParser $commentParser
+ * @property  PHP_CodeSniffer_File $currentFile
+ * @method    getIndentation
  */
 class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commenting_FileCommentSniff
 {
-
     /**
      * Tags in correct order and related info.
      *
@@ -128,8 +131,6 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
         );
     }
 
-    //end register()
-
     /**
      * Processes this test, when one of its tokens is encountered.
      *
@@ -198,13 +199,9 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                             return;
                         }
                     }
-                    //end if
                 }
-                //end if
             }
-            //end if
         }
-        //end if
 
         $comment = $phpcsFile->getTokensAsString(
             $commentStart,
@@ -221,6 +218,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             return;
         }
 
+        /** @var PHP_CodeSniffer_CommentParser_CommentElement $comment */
         $comment = $this->commentParser->getComment();
         if (is_null($comment) === true) {
             $error = 'Doc comment is empty for %s';
@@ -272,8 +270,6 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
         $this->processTags($commentStart, $commentEnd);
     }
 
-    //end process()
-
     /**
      * Processes each required or optional tag.
      *
@@ -284,12 +280,13 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
      */
     protected function processTags($commentStart, $commentEnd)
     {
-        $docBlock    = (get_class($this) === 'Joomla_Sniffs_Commenting_FileCommentSniff') ? 'file' : 'class';
-        $foundTags   = $this->commentParser->getTagOrders();
-        $orderIndex  = 0;
+        $docBlock = (get_class($this) === 'Joomla_Sniffs_Commenting_FileCommentSniff')
+            ? 'file' : 'class';
+        $foundTags = $this->commentParser->getTagOrders();
+        $orderIndex = 0;
         $indentation = array();
-        $longestTag  = 0;
-        $errorPos    = 0;
+        $longestTag = 0;
+        $errorPos = 0;
 
         foreach ($this->tags as $tag => $info) {
 
@@ -314,6 +311,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
 
             $errorPos = $commentStart;
             if (is_array($tagElement) === false) {
+                /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $tagElement */
                 $errorPos = ($commentStart + $tagElement->getLine());
             }
 
@@ -364,6 +362,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             }
 
             if (is_array($tagElement) === true) {
+                /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $element */
                 foreach ($tagElement as $key => $element) {
                     $indentation[] = array(
                         'tag' => $tag,
@@ -384,6 +383,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                 call_user_func(array($this, $method), $errorPos);
             } else {
                 if (is_array($tagElement) === true) {
+                    /** @var PHP_CodeSniffer_CommentParser_SingleElement $element */
                     foreach ($tagElement as $key => $element) {
                         $element->process(
                             $this->currentFile,
@@ -392,6 +392,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                         );
                     }
                 } else {
+                    /** @var PHP_CodeSniffer_CommentParser_SingleElement $tagElement */
                     $tagElement->process(
                         $this->currentFile,
                         $commentStart,
@@ -400,7 +401,6 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                 }
             }
         }
-        //end foreach
 
         foreach ($indentation as $indentInfo) {
             if ($indentInfo['space'] !== 0
@@ -416,6 +416,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
                 if ($this->tags[$indentInfo['tag']]['allow_multiple'] === true) {
                     $line = $indentInfo['line'];
                 } else {
+                    /** @var PHP_CodeSniffer_CommentParser_AbstractDocElement $tagElem */
                     $tagElem = $this->commentParser->$getTagMethod();
                     $line = $tagElem->getLine();
                 }
@@ -424,8 +425,6 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             }
         }
     }
-
-    //end processTags()
 
     /**
      * Process the version tag.
@@ -452,10 +451,7 @@ class Joomla_Sniffs_Commenting_ClassCommentSniff extends Joomla_Sniffs_Commentin
             }
         }
     }
-    //end processVersion()
 
 }
-
-//end class
 
 ?>

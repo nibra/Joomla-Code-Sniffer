@@ -52,7 +52,7 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
     {
         return array(T_SWITCH);
 
-    }//end register()
+    }
 
 
     /**
@@ -185,10 +185,10 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
                         $phpcsFile->addError($error, $nextBreak, 'SpacingAfterBreak');
                     }
                     */
-                }//end if
+                }
             } else {
                 $nextBreak = $tokens[$nextCase]['scope_closer'];
-            }//end if
+            }
 
             /*
                 Ensure CASE statements are not followed by
@@ -208,7 +208,7 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
                 $error = 'Blank lines are not allowed after CASE statements';
                 $phpcsFile->addError($error, $nextCase, 'SpacingAfterCase');
             }
-        }//end while
+        }
 
         $default = $phpcsFile->findPrevious(T_DEFAULT, $switch['scope_closer'], $switch['scope_opener']);
 
@@ -275,7 +275,7 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
                 $phpcsFile->addError($error, $default, 'DefaultNoBreak');
 
                 $nextBreak = $tokens[$default]['scope_closer'];
-            }//end if
+            }
 
             /*
                 Ensure empty DEFAULT statements are not allowed.
@@ -318,7 +318,7 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
         } else {
             $error = 'All SWITCH statements must contain a DEFAULT case';
             $phpcsFile->addError($error, $stackPtr, 'MissingDefault');
-        }//end if
+        }
 
         if ($tokens[$switch['scope_closer']]['column'] !== $switch['column']) {
             $error = 'Closing brace of SWITCH statement must be aligned with SWITCH keyword';
@@ -330,9 +330,8 @@ class Joomla_Sniffs_ControlStructures_SwitchDeclarationSniff implements PHP_Code
             $phpcsFile->addError($error, $stackPtr, 'MissingCase');
         }
 
-    }//end process()
+    }
 
-
-}//end class
+}
 
 ?>
