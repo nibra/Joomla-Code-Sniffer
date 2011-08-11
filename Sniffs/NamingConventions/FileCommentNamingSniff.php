@@ -45,7 +45,7 @@ if (class_exists('PHP_CodeSniffer_CommentParser_ClassCommentParser', true) === f
  * @link      http://pear.php.net/package/PHP_CodeSniffer
  */
 
-class Joomla_Sniffs_Commenting_FileCommentNamingSniff implements PHP_CodeSniffer_Sniff
+class Joomla_Sniffs_NamingConventions_FileCommentNamingSniff implements PHP_CodeSniffer_Sniff
 {
 
     /**
